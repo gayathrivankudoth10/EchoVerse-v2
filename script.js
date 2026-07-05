@@ -1,105 +1,151 @@
+// ===========================
+// AI CLASSIFIER
+// ===========================
+
 document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("Script loaded");
+    console.log("Script Loaded Successfully");
 
     const predictButton = document.getElementById("predictBtn");
     const fileInput = document.getElementById("audioFile");
     const resultDiv = document.getElementById("result");
 
-    if (!predictButton || !fileInput || !resultDiv) {
-        console.error("HTML element not found. Check your IDs.");
-        return;
-    }
+    if (predictButton && fileInput && resultDiv) {
 
-    predictButton.addEventListener("click", async (e) => {
-        e.preventDefault();
+        predictButton.addEventListener("click", async (e) => {
 
-        if (fileInput.files.length === 0) {
-            resultDiv.innerHTML =
-                "<p style='color:red;'>Please choose an MP3 or WAV file.</p>";
-            return;
-        }
+            e.preventDefault();
 
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
+            if (fileInput.files.length === 0) {
 
-        resultDiv.innerHTML = "<p>Predicting...</p>";
-
-        try {
-
-            const response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error("Server returned an error.");
+                resultDiv.innerHTML =
+                    "<p style='color:red;'>Please choose an MP3 or WAV file.</p>";
+                return;
             }
 
-            const data = await response.json();
-resultDiv.innerHTML = `
-    <h3>Prediction Result</h3>
-    <p><strong>Genre:</strong> ${data.genre}</p>
-    <p><strong>Confidence:</strong> ${data.confidence}</p>
-`;
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
 
-setTimeout(() => {
-    console.log("100 seconds passed");
-}, 1000000);
-        } catch (error) {
+            resultDiv.innerHTML = "<p>Predicting...</p>";
 
-            console.error(error);
+            try {
 
-            resultDiv.innerHTML = `
-                <p style="color:red;">
-                    Server error. Try again.
-                </p>
-            `;
-        }
+                const response = await fetch("http://127.0.0.1:5000/predict", {
 
-    });
+                    method: "POST",
+                    body: formData
+
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server Error");
+                }
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <h3>Prediction Result</h3>
+                    <p><strong>Genre:</strong> ${data.genre}</p>
+                    <p><strong>Confidence:</strong> ${data.confidence}</p>
+                `;
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                resultDiv.innerHTML = `
+                    <p style="color:red;">
+                        Server Error. Try Again.
+                    </p>
+                `;
+            }
+
+        });
+
+    }
 
 });
-// ----------------------
+
+
+// ===========================
 // MUSIC PLAYER
-// ----------------------
+// ===========================
 
 const audioPlayer = document.getElementById("audioPlayer");
 const coverImage = document.getElementById("coverImage");
 const songTitle = document.getElementById("songTitle");
 const playBtn = document.getElementById("playBtn");
 
+function playSong(song, title, image) {
 
-function playSong(audio, title, image) {
+    if (!audioPlayer) return;
 
-    console.log("Playing:", audio);
+    audioPlayer.pause();
 
-    audioPlayer.src = audio;
+    audioPlayer.src = song;
+
+    audioPlayer.load();
+
     coverImage.src = image;
+
     songTitle.textContent = title;
 
     audioPlayer.play()
-        .then(() => {
-            console.log("Song started");
-            playBtn.textContent = "⏸️";
-        })
-        .catch(err => {
-            console.error("Audio Error:", err);
-            alert("Cannot play audio. Check the console.");
-        });
+
+    .then(() => {
+
+        playBtn.textContent = "⏸️";
+
+    })
+
+    .catch((err) => {
+
+        console.error("Audio Error:", err);
+
+        alert("Unable to play this song.");
+
+    });
+
 }
 
 function togglePlay() {
 
+    if (!audioPlayer) return;
+
     if (audioPlayer.paused) {
+
         audioPlayer.play();
+
         playBtn.textContent = "⏸️";
-    } else {
-        audioPlayer.pause();
-        playBtn.textContent = "▶️";
+
     }
+
+    else {
+
+        audioPlayer.pause();
+
+        playBtn.textContent = "▶️";
+
+    }
+
 }
 
-audioPlayer.addEventListener("ended", () => {
+audioPlayer?.addEventListener("ended", () => {
+
     playBtn.textContent = "▶️";
+
+});
+
+audioPlayer?.addEventListener("play", () => {
+
+    playBtn.textContent = "⏸️";
+
+});
+
+audioPlayer?.addEventListener("pause", () => {
+
+    playBtn.textContent = "▶️";
+
 });
