@@ -1022,3 +1022,22 @@ display:none;
     opacity:1;
     transform:translateY(0);
 }
+#result {
+    display: block;
+    min-height: 100px;
+    width: 100%;
+    margin-top: 30px;
+    padding: 25px;
+    color: white;
+    text-align: center;
+}
+
+#result h2 {
+    color: #1DB954;
+    margin-bottom: 15px;
+}
+
+#result h3 {
+    margin: 10px 0;
+    color: white;
+}

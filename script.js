@@ -4,70 +4,72 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("Script Loaded Successfully");
+    console.log("EchoVerse Classifier Loaded");
 
     const predictButton = document.getElementById("predictBtn");
     const fileInput = document.getElementById("audioFile");
     const resultDiv = document.getElementById("result");
 
-    if (predictButton && fileInput && resultDiv) {
+    predictButton.addEventListener("click", async (e) => {
 
-        predictButton.addEventListener("click", async (e) => {
+        e.preventDefault();
 
-            e.preventDefault();
+        console.log("Predict button clicked!");
 
-            if (fileInput.files.length === 0) {
+        if (!fileInput.files.length) {
+            resultDiv.innerHTML = "Please select an audio file.";
+            return;
+        }
 
-                resultDiv.innerHTML =
-                    "<p style='color:red;'>Please choose an MP3 or WAV file.</p>";
-                return;
-            }
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
 
-            const formData = new FormData();
-            formData.append("file", fileInput.files[0]);
+        resultDiv.innerHTML = "<h3>Predicting...</h3>";
 
-            resultDiv.innerHTML = "<p>Predicting...</p>";
+        try {
 
-            try {
-
-                const response = await fetch("http://127.0.0.1:5000/predict", {
-
+            const response = await fetch(
+                "http://127.0.0.1:5000/predict",
+                {
                     method: "POST",
                     body: formData
-
-                });
-
-                if (!response.ok) {
-                    throw new Error("Server Error");
                 }
+            );
 
-                const data = await response.json();
+            console.log("Response Status:", response.status);
 
-                resultDiv.innerHTML = `
-                    <h3>Prediction Result</h3>
-                    <p><strong>Genre:</strong> ${data.genre}</p>
-                    <p><strong>Confidence:</strong> ${data.confidence}</p>
-                `;
+            const data = await response.json();
 
+            console.log("Prediction Data:", data);
+
+            if (!response.ok) {
+                throw new Error(data.error || "Prediction failed");
             }
 
-            catch (error) {
+            resultDiv.innerHTML = `
+                <h2>Prediction Result</h2>
+                <h3>Genre: ${data.genre}</h3>
+                <h3>Confidence: ${data.confidence}</h3>
+            `;
 
-                console.error(error);
+            resultDiv.style.display = "block";
+            resultDiv.style.color = "white";
 
-                resultDiv.innerHTML = `
-                    <p style="color:red;">
-                        Server Error. Try Again.
-                    </p>
-                `;
-            }
+        } catch (error) {
 
-        });
+            console.error("Prediction Error:", error);
 
-    }
-
+            resultDiv.innerHTML = `
+                <h3 style="color:red;">
+                    ${error.message}
+                </h3>
+            `;
+        }
+    });
 });
 
+
+      
 
 // ===========================
 // MUSIC PLAYER
@@ -149,3 +151,16 @@ audioPlayer?.addEventListener("pause", () => {
     playBtn.textContent = "▶️";
 
 });
+const resultBox = document.getElementById("result");
+
+if (resultBox) {
+    const observer = new MutationObserver(() => {
+        console.log("RESULT BOX CHANGED:", resultBox.innerHTML);
+    });
+
+    observer.observe(resultBox, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+}
